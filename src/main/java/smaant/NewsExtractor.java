@@ -3,6 +3,7 @@ package smaant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jsoup.Jsoup;
@@ -13,7 +14,8 @@ import org.jsoup.select.Elements;
 public class NewsExtractor {
 
   // ToDo: move to external properties
-  private static final String BASE_URL = "http://www.banki.ru/banks/bank/";
+  private static final String BASE_URL = "http://www.banki.ru";
+  private static final String BANK_URL = BASE_URL + "/banks/bank";
   private static final String NEWS_PATH = "/news/";
 
   private static final String DATE_SELECTOR = "div.widget__date";
@@ -22,7 +24,12 @@ public class NewsExtractor {
   private static final String NEWS_TIME_SELECTOR = "span.text-list-date";
   private static final String NEWS_TITLE_SELECTOR = "a.text-list-link";
   private static final String NEWS_LINK_SELECTOR = NEWS_TITLE_SELECTOR;
+
   private static final String NEWS_DATE_TIME_PATTERN = "dd.MM.yyyy HH:mm";
+
+  private static final String NEWS_ARTICLE_SELECTOR = "article";
+  private static final String NEWS_ARTICLE_CONTENT = NEWS_ARTICLE_SELECTOR + " *";
+  private static final String[] TAGS_TO_REMOVE = {"div"};
   //--------------
 
   public static final DateTimeFormatter NEWS_DATE_TIME = DateTimeFormatter.ofPattern(NEWS_DATE_TIME_PATTERN);
@@ -33,7 +40,7 @@ public class NewsExtractor {
     this.bankName = bankName;
   }
 
-  String getNewsPage() {
+  private String readUrl() {
     return null;
   }
   
@@ -58,6 +65,12 @@ public class NewsExtractor {
       );
     }
     return result;
+  }
+
+  String extractNewsText(String pageSrc) {
+    final Document doc = Jsoup.parse(pageSrc);
+    Arrays.stream(TAGS_TO_REMOVE).forEach(tag -> doc.select(NEWS_ARTICLE_SELECTOR + " " + tag).remove());
+    return doc.select(NEWS_ARTICLE_CONTENT).toString();
   }
 
   public List<NewsItem> getAllNews() {

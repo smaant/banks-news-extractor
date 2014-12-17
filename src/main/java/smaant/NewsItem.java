@@ -2,20 +2,40 @@ package smaant;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import java.time.LocalDateTime;
+import org.joda.time.DateTime;
 
 public class NewsItem {
 
-  private LocalDateTime date;
+  private DateTime date;
   private String title;
   private String url;
   private String text;
 
-  public NewsItem(LocalDateTime date, String title, String url, String text) {
+  public NewsItem(DateTime date, String title, String url, String text) {
     this.date = date;
     this.title = title;
     this.url = url;
     this.text = text;
+  }
+
+  public NewsItem(NewsItem src, String text) {
+    this(src.getDate(), src.getTitle(), src.getUrl(), text);
+  }
+
+  public DateTime getDate() {
+    return date;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public String getText() {
+    return text;
   }
 
   @Override

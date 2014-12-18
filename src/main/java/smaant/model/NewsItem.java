@@ -1,11 +1,15 @@
-package smaant;
+package smaant.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.joda.time.DateTime;
+import org.springframework.data.annotation.Id;
 
 public class NewsItem {
+  @Id
+  private String id;
 
+  private int hash;
   private DateTime date;
   private String title;
   private String url;
@@ -16,6 +20,7 @@ public class NewsItem {
     this.title = title;
     this.url = url;
     this.text = text;
+    this.hash = hashCode();
   }
 
   public NewsItem(NewsItem src, String text) {

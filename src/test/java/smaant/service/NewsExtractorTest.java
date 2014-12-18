@@ -1,26 +1,26 @@
-package smaant;
+package smaant.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import javax.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import smaant.Application;
+import smaant.model.NewsItem;
 
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = Application.class)
 public class NewsExtractorTest {
 
+  @Inject
   private NewsExtractor newsExtractor;
-
-  public NewsExtractorTest() {
-  }
-
-  @Before
-  public void setup() {
-    newsExtractor = new NewsExtractor("intercommerzbank");
-  }
 
   @Test
   public void newsItemShouldBeExtracted() throws IOException {
@@ -66,6 +66,6 @@ public class NewsExtractorTest {
 
   private NewsItem createItem(String date, String title, int id) {
     final String url = String.format("/news/lenta/?id=%d", id);
-    return new NewsItem(DateTime.parse(date, NewsExtractor.NEWS_DATE_TIME), title, url, null);
+    return new NewsItem(DateTime.parse(date, newsExtractor.getDateTimeFormatter()), title, url, null);
   }
 }

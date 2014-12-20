@@ -1,6 +1,7 @@
 package smaant.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,11 +33,17 @@ public class NewsExtractor {
   @Value("${url.news_path}")
   private String NEWS_PATH;
 
+  @Value("${selector.news_date}")
+  private String NEWS_DATE_SELECTOR;
+
+  @Value("${selector.news_group}")
+  private String NEWS_GROUP_SELECTOR;
+
   @Value("${selector.news_item}")
   private String NEWS_ITEM_SELECTOR;
 
-  @Value("${selector.news_date}")
-  private String NEWS_DATE_SELECTOR;
+  @Value("${selector.news_time}")
+  private String NEWS_TIME_SELECTOR;
 
   @Value("${selector.news_title}")
   private String NEWS_TITLE_SELECTOR;
@@ -71,19 +78,26 @@ public class NewsExtractor {
     return html;
   }
   
-  private NewsItem extractNewsItem(Element newsElement) {
-    final String date = newsElement.select(NEWS_DATE_SELECTOR).text();
+  private NewsItem extractNewsItem(String newsDate, Element newsElement) {
+    final String time = newsElement.select(NEWS_TIME_SELECTOR).text();
     final String title = newsElement.select(NEWS_TITLE_SELECTOR).text();
     final String url = newsElement.select(NEWS_LINK_SELECTOR).attr("href");
-    return new NewsItem(DateTime.parse(date, getDateTimeFormatter()), title, url, null);
-  }
+    return new NewsItem(DateTime.parse(newsDate + " " + time, getDateTimeFormatter()), title, url, null);  }
 
   List<NewsItem> extractNewsTitles(String pageSrc) {
     final Document doc = Jsoup.parse(pageSrc);
-    final Elements news = doc.select(NEWS_ITEM_SELECTOR);
+    final Elements dates = doc.select(NEWS_DATE_SELECTOR);
+    final Elements news = doc.select(NEWS_GROUP_SELECTOR);
 
-    return news.stream()
-        .map(this::extractNewsItem).collect(Collectors.toList());
+    final List<NewsItem> result = new ArrayList<>();
+    for (int i = 0; i < dates.size(); i++) {
+      final String newsDate = dates.get(i).text();
+      result.addAll(
+          news.get(i).getElementsByTag(NEWS_ITEM_SELECTOR).stream()
+              .map(x -> extractNewsItem(newsDate, x)).collect(Collectors.toList())
+      );
+    }
+    return result;
   }
 
   String extractNewsText(String pageSrc) {
@@ -94,7 +108,7 @@ public class NewsExtractor {
 
   public DateTimeFormatter getDateTimeFormatter() {
     if (dateTimeFormatter == null) {
-      dateTimeFormatter = DateTimeFormat.forPattern("dd.MM.yyyy");
+      dateTimeFormatter = DateTimeFormat.forPattern(NEWS_DATE_TIME_PATTERN);
     }
     return dateTimeFormatter;
   }

@@ -23,10 +23,19 @@ public class NewsExtractorTest {
   private NewsExtractor newsExtractor;
 
   @Test
-  public void newsItemShouldBeExtracted() throws IOException {
+  public void dayWithOneItemShouldBeExtracted() throws IOException {
     final String testData = readResource("oneItem.html");
     assertThat(newsExtractor.extractNewsTitles(testData), containsInAnyOrder(
-        createItem("10.12.2014", "News title", 12345)
+        createItem("10.12.2014 17:42", "News title", 7431979)
+    ));
+  }
+
+  @Test
+  public void dayWithTwoItemsShouldBeExtracted() throws IOException {
+    final String testData = readResource("twoItems.html");
+    assertThat(newsExtractor.extractNewsTitles(testData), containsInAnyOrder(
+        createItem("10.12.2014 17:42", "News1 title", 7431979),
+        createItem("10.12.2014 18:42", "News2 title", 7431980)
     ));
   }
 

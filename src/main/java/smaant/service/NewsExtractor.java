@@ -1,15 +1,9 @@
 package smaant.service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -23,15 +17,6 @@ import smaant.model.NewsItem;
 
 @Service
 public class NewsExtractor {
-
-  @Value("${url.base}")
-  private String BASE_URL;
-
-  @Value("${url.bank}")
-  private String BANK_URL;
-
-  @Value("${url.news_path}")
-  private String NEWS_PATH;
 
   @Value("${selector.news_date}")
   private String NEWS_DATE_SELECTOR;
@@ -65,26 +50,14 @@ public class NewsExtractor {
 
   private DateTimeFormatter dateTimeFormatter;
 
-  private String readUrl(String url) {
-    final HttpClient httpClient = HttpClientBuilder.create().build();
-    final HttpGet httpGet = new HttpGet(url);
-    final String html;
-    try {
-      final HttpResponse response = httpClient.execute(httpGet);
-      html = EntityUtils.toString(response.getEntity());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+  public DateTimeFormatter getDateTimeFormatter() {
+    if (dateTimeFormatter == null) {
+      dateTimeFormatter = DateTimeFormat.forPattern(NEWS_DATE_TIME_PATTERN);
     }
-    return html;
+    return dateTimeFormatter;
   }
-  
-  private NewsItem extractNewsItem(String newsDate, Element newsElement) {
-    final String time = newsElement.select(NEWS_TIME_SELECTOR).text();
-    final String title = newsElement.select(NEWS_TITLE_SELECTOR).text();
-    final String url = newsElement.select(NEWS_LINK_SELECTOR).attr("href");
-    return new NewsItem(DateTime.parse(newsDate + " " + time, getDateTimeFormatter()), title, url, null);  }
 
-  List<NewsItem> extractNewsTitles(String pageSrc) {
+  public List<NewsItem> getNewsPreviews(String bankName, String pageSrc) {
     final Document doc = Jsoup.parse(pageSrc);
     final Elements dates = doc.select(NEWS_DATE_SELECTOR);
     final Elements news = doc.select(NEWS_GROUP_SELECTOR);
@@ -94,31 +67,22 @@ public class NewsExtractor {
       final String newsDate = dates.get(i).text();
       result.addAll(
           news.get(i).getElementsByTag(NEWS_ITEM_SELECTOR).stream()
-              .map(x -> extractNewsItem(newsDate, x)).collect(Collectors.toList())
+              .map(x -> extractNewsItem(bankName, newsDate, x)).collect(Collectors.toList())
       );
     }
     return result;
   }
 
-  String extractNewsText(String pageSrc) {
+  public String getNewsText(String pageSrc) {
     final Document doc = Jsoup.parse(pageSrc);
     Arrays.stream(TAGS_TO_REMOVE).forEach(tag -> doc.select(NEWS_ARTICLE_SELECTOR + " " + tag).remove());
     return doc.select(NEWS_ARTICLE_CONTENT).toString();
   }
 
-  public DateTimeFormatter getDateTimeFormatter() {
-    if (dateTimeFormatter == null) {
-      dateTimeFormatter = DateTimeFormat.forPattern(NEWS_DATE_TIME_PATTERN);
-    }
-    return dateTimeFormatter;
-  }
-
-  public List<NewsItem> getAllNews(String bankName) {
-    final String html = readUrl(BANK_URL + bankName + NEWS_PATH);
-    final List<NewsItem> news = extractNewsTitles(html);
-    return news.stream().map(x -> {
-      String text = extractNewsText(readUrl(BASE_URL + x.getUrl()));
-      return new NewsItem(x, text);
-    }).collect(Collectors.toList());
+  private NewsItem extractNewsItem(String bankName, String newsDate, Element newsElement) {
+    final String time = newsElement.select(NEWS_TIME_SELECTOR).text();
+    final String title = newsElement.select(NEWS_TITLE_SELECTOR).text();
+    final String url = newsElement.select(NEWS_LINK_SELECTOR).attr("href");
+    return new NewsItem(bankName, DateTime.parse(newsDate + " " + time, getDateTimeFormatter()), title, url, null);
   }
 }

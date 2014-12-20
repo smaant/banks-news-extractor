@@ -10,21 +10,29 @@ public class NewsItem {
   private String id;
 
   private int hash;
+  private String bank;
   private DateTime date;
   private String title;
   private String url;
   private String text;
 
-  public NewsItem(DateTime date, String title, String url, String text) {
+  public NewsItem() { }
+
+  public NewsItem(String bank, DateTime date, String title, String url, String text) {
+    this.bank = bank;
     this.date = date;
     this.title = title;
     this.url = url;
     this.text = text;
-    this.hash = hashCode();
+    this.hash = Objects.hashCode(bank, date, title, url);
   }
 
   public NewsItem(NewsItem src, String text) {
-    this(src.getDate(), src.getTitle(), src.getUrl(), text);
+    this(src.getBank(), src.getDate(), src.getTitle(), src.getUrl(), text);
+  }
+
+  public String getBank() {
+    return bank;
   }
 
   public DateTime getDate() {
@@ -43,9 +51,14 @@ public class NewsItem {
     return text;
   }
 
+  public int getHash() {
+    return hash;
+  }
+
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
+        .add("bank", bank)
         .add("date", date)
         .add("title", title)
         .add("url", url)
@@ -61,7 +74,8 @@ public class NewsItem {
 
     NewsItem that = (NewsItem) o;
 
-    return Objects.equal(this.date, that.date) &&
+    return Objects.equal(this.bank, that.bank) &&
+        Objects.equal(this.date, that.date) &&
         Objects.equal(this.title, that.title) &&
         Objects.equal(this.url, that.url) &&
         Objects.equal(this.text, that.text);
@@ -69,6 +83,6 @@ public class NewsItem {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(date, title, url, text);
+    return Objects.hashCode(bank, date, title, url, text);
   }
 }

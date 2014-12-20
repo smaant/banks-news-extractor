@@ -19,48 +19,53 @@ import smaant.model.NewsItem;
 @SpringApplicationConfiguration(classes = Application.class)
 public class NewsExtractorTest {
 
+  private static final String BANK = "bank";
+
   @Inject
   private NewsExtractor newsExtractor;
 
   @Test
   public void dayWithOneItemShouldBeExtracted() throws IOException {
     final String testData = readResource("oneItem.html");
-    assertThat(newsExtractor.extractNewsTitles(testData), containsInAnyOrder(
-        createItem("10.12.2014 17:42", "News title", 7431979)
+    assertThat(newsExtractor.getNewsPreviews(BANK, testData), containsInAnyOrder(
+        createItem(BANK, "10.12.2014 17:42", "News title", 7431979)
     ));
   }
 
   @Test
   public void dayWithTwoItemsShouldBeExtracted() throws IOException {
     final String testData = readResource("twoItems.html");
-    assertThat(newsExtractor.extractNewsTitles(testData), containsInAnyOrder(
-        createItem("10.12.2014 17:42", "News1 title", 7431979),
-        createItem("10.12.2014 18:42", "News2 title", 7431980)
+    assertThat(newsExtractor.getNewsPreviews(BANK, testData), containsInAnyOrder(
+        createItem(BANK, "10.12.2014 17:42", "News1 title", 7431979),
+        createItem(BANK, "10.12.2014 18:42", "News2 title", 7431980)
     ));
   }
 
   @Test
   public void wholeNewsTextShouldBeExtracted() throws IOException {
     final String testData = readResource("text.html");
-    assertThat(newsExtractor.extractNewsText(testData), equalTo("<p>First paragraph</p>\n<p>Second paragraph</p>"));
+    assertThat(newsExtractor.getNewsText(testData),
+        equalTo("<p>First paragraph</p>\n<p>Second paragraph</p>"));
   }
 
   @Test
   public void uselessInformationShouldBeDeletedFromText() throws IOException {
     final String testData = readResource("textWithNote.html");
-    assertThat(newsExtractor.extractNewsText(testData), equalTo("<p>First paragraph</p>\n<p>Second paragraph</p>"));
+    assertThat(newsExtractor.getNewsText(testData),
+        equalTo("<p>First paragraph</p>\n<p>Second paragraph</p>"));
   }
 
   @Test
   public void newsWithTextOutOfTagShouldBeExtracted() throws IOException {
     final String testData = readResource("textOutOfTag.html");
-    assertThat(newsExtractor.extractNewsText(testData), equalTo("<p>First paragraph</p>\n<p>Second paragraph</p>"));
+    assertThat(newsExtractor.getNewsText(testData),
+        equalTo("<p>First paragraph</p>\n<p>Second paragraph</p>"));
   }
 
   @Test
   public void newsWithInternalTagsShouldBeExtracted() throws IOException {
     final String testData = readResource("textWithInternalTags.html");
-    assertThat(newsExtractor.extractNewsText(testData),
+    assertThat(newsExtractor.getNewsText(testData),
         equalTo("<p>First paragraph <a>link1</a></p>\n<p>Second paragraph <a>link2</a></p>"));
   }
 
@@ -73,8 +78,8 @@ public class NewsExtractorTest {
     return IOUtils.toString(resource);
   }
 
-  private NewsItem createItem(String date, String title, int id) {
+  private NewsItem createItem(String bankName, String date, String title, int id) {
     final String url = String.format("/news/lenta/?id=%d", id);
-    return new NewsItem(DateTime.parse(date, newsExtractor.getDateTimeFormatter()), title, url, null);
+    return new NewsItem(bankName, DateTime.parse(date, newsExtractor.getDateTimeFormatter()), title, url, null);
   }
 }

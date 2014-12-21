@@ -6,7 +6,9 @@ import java.util.List;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document
 public class User {
 
   @Id
@@ -22,6 +24,14 @@ public class User {
   private List<Bank> banks = Collections.emptyList();
 
   public User() { }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
 
   public String getName() {
     return name;

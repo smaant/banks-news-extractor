@@ -19,4 +19,14 @@ public class UserService {
     return userRepository.findByName(name);
   }
 
+  public void updateUser(User user) {
+    User result = userRepository.findByName(user.getName());
+    user.setId(result.getId());
+    userRepository.save(user);
+  }
+
+  public void deleteUser(String username) {
+    User user = userRepository.findByName(username);
+    userRepository.delete(user);
+  }
 }

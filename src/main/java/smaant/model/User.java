@@ -21,9 +21,17 @@ public class User {
   @NotBlank @Email
   private String email;
 
+  @JsonIgnore
+  private List<NewsItem> news;
+
   private List<Bank> banks = Collections.emptyList();
 
   public User() { }
+
+  public User(String email, List<Bank> banks) {
+    this.email = email;
+    this.banks = banks;
+  }
 
   public String getId() {
     return id;
@@ -37,16 +45,15 @@ public class User {
     return name;
   }
 
-  public User(String email, List<Bank> banks) {
-    this.email = email;
-    this.banks = banks;
-  }
-
   public String getEmail() {
     return email;
   }
 
   public List<Bank> getBanks() {
     return banks;
+  }
+
+  public List<NewsItem> getNews() {
+    return news;
   }
 }

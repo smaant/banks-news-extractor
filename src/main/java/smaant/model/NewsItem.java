@@ -3,34 +3,23 @@ package smaant.model;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.joda.time.DateTime;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
 public class NewsItem {
-  @Id
-  private String id;
 
   private int hash;
   private String bank;
   private DateTime date;
   private String title;
   private String url;
-  private String text;
 
   public NewsItem() { }
 
-  public NewsItem(String bank, DateTime date, String title, String url, String text) {
+  public NewsItem(String bank, DateTime date, String title, String url) {
     this.bank = bank;
     this.date = date;
     this.title = title;
     this.url = url;
-    this.text = text;
     this.hash = Objects.hashCode(bank, date, title, url);
-  }
-
-  public NewsItem(NewsItem src, String text) {
-    this(src.getBank(), src.getDate(), src.getTitle(), src.getUrl(), text);
   }
 
   public String getBank() {
@@ -49,10 +38,6 @@ public class NewsItem {
     return url;
   }
 
-  public String getText() {
-    return text;
-  }
-
   public int getHash() {
     return hash;
   }
@@ -64,7 +49,6 @@ public class NewsItem {
         .add("date", date)
         .add("title", title)
         .add("url", url)
-        .add("text", text)
         .omitNullValues()
         .toString();
   }
@@ -79,12 +63,11 @@ public class NewsItem {
     return Objects.equal(this.bank, that.bank) &&
         Objects.equal(this.date, that.date) &&
         Objects.equal(this.title, that.title) &&
-        Objects.equal(this.url, that.url) &&
-        Objects.equal(this.text, that.text);
+        Objects.equal(this.url, that.url);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(bank, date, title, url, text);
+    return Objects.hashCode(bank, date, title, url);
   }
 }

@@ -5,17 +5,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.springframework.stereotype.Service;
-import smaant.dao.NewsRepository;
+import smaant.dao.UserRepository;
 import smaant.model.NewsItem;
+import smaant.model.User;
 
 @Service
 public class NewsService {
 
   @Inject
-  private NewsRepository repository;
+  private NewsExtractor newsExtractor;
 
   @Inject
-  private NewsExtractor newsExtractor;
+  private UserRepository userRepository;
 
   @Inject
   private BankiRuService bankiRuService;
@@ -30,21 +31,21 @@ public class NewsService {
     return newsExtractor.getNewsText(newsPage);
   }
 
-  public List<NewsItem> getNewNews(String bankName) {
-    final List<NewsItem> allPreviews = getNewsPreviews(bankName);
-    final List<NewsItem> knownPreviews = repository.findPreviewsByHashIn(
+  public List<NewsItem> getNewNews(String username, String bankId) {
+    final List<NewsItem> allPreviews = getNewsPreviews(bankId);
+    final User user = userRepository.findPreviewsByNameAndHashIn(
+        username,
         allPreviews.stream().map(NewsItem::getHash).collect(Collectors.toList())
     );
-    return filterKnown(allPreviews, knownPreviews).stream()
-        .map(x -> new NewsItem(x, getNewsText(x))).collect(Collectors.toList());
+    if (user == null) {
+      return allPreviews;
+    } else {
+      return allPreviews.stream().filter(x -> !user.getNews().contains(x)).collect(Collectors.toList());
+    }
   }
 
-  private List<NewsItem> filterKnown(List<NewsItem> all, List<NewsItem> known) {
-    return all.stream().filter(x -> !known.contains(x)).collect(Collectors.toList());
-  }
-
-  public void saveNews(Collection<NewsItem> news) {
-    repository.save(news);
+  public void pushNews(String username, Collection<NewsItem> news) {
+    userRepository.pushNews(username, news);
   }
 
 }

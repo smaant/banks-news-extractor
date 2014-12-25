@@ -83,6 +83,6 @@ public class NewsExtractor {
     final String time = newsElement.select(NEWS_TIME_SELECTOR).text();
     final String title = newsElement.select(NEWS_TITLE_SELECTOR).text();
     final String url = newsElement.select(NEWS_LINK_SELECTOR).attr("href");
-    return new NewsItem(bankName, DateTime.parse(newsDate + " " + time, getDateTimeFormatter()), title, url, null);
+    return new NewsItem(bankName, DateTime.parse(newsDate + " " + time, getDateTimeFormatter()), title, url);
   }
 }

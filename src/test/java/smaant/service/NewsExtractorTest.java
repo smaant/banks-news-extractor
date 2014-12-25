@@ -80,6 +80,6 @@ public class NewsExtractorTest {
 
   private NewsItem createItem(String bankName, String date, String title, int id) {
     final String url = String.format("/news/lenta/?id=%d", id);
-    return new NewsItem(bankName, DateTime.parse(date, newsExtractor.getDateTimeFormatter()), title, url, null);
+    return new NewsItem(bankName, DateTime.parse(date, newsExtractor.getDateTimeFormatter()), title, url);
   }
 }

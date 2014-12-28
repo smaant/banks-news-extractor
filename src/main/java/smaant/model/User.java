@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document
+@Document(collection = "users")
 public class User {
 
   @Id
@@ -20,9 +20,6 @@ public class User {
 
   @NotBlank @Email
   private String email;
-
-  @JsonIgnore
-  private List<NewsItem> news;
 
   private List<Bank> banks = Collections.emptyList();
 
@@ -51,9 +48,5 @@ public class User {
 
   public List<Bank> getBanks() {
     return banks;
-  }
-
-  public List<NewsItem> getNews() {
-    return news;
   }
 }

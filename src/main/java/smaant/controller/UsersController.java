@@ -1,19 +1,23 @@
 package smaant.controller;
 
-import com.google.common.base.Joiner;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.Valid;
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.trimou.engine.MustacheEngineBuilder;
 import smaant.exceptions.UsernameAlreadyTakenException;
 import smaant.model.Bank;
 import smaant.model.NewsItem;
@@ -21,6 +25,7 @@ import smaant.model.User;
 import smaant.service.EmailService;
 import smaant.service.NewsService;
 import smaant.service.UserService;
+import smaant.utils.JodaDateTimeFormatHelper;
 
 @RestController
 @RequestMapping("/users")
@@ -47,22 +52,50 @@ public class UsersController {
   }
 
   @RequestMapping(value = "/{username}/collectNews", method = RequestMethod.POST)
-  public ResponseEntity<Void> collectNews(@PathVariable("username") String username) {
+  public ResponseEntity<Void> collectNews(@PathVariable("username") String username) throws IOException {
     final User user = userService.getOrThrow(username);
 
     final List<NewsItem> news = new ArrayList<>();
     for (Bank bank : user.getBanks()) {
-      news.addAll(newsService.getNewNews(username, bank.getId()));
+      news.addAll(newsService.getNewNews(username, bank));
     }
 
-    final List<String> titles = news.stream().map(NewsItem::getTitle).collect(Collectors.toList());
-    final String html = "<html><body>" + Joiner.on("<br>").join(titles) + "</body></html>";
+    final Map<String, Object> data = new HashMap<>();
+    data.put("banks",
+        news.stream().collect(Collectors.groupingBy(NewsItem::getBank))
+            .entrySet().stream().map(x -> new DataItem(x.getKey().getName(), x.getValue())).collect(Collectors.toList()));
+
+    final InputStream in = this.getClass().getResourceAsStream("/mail.html");
+
+    final String html = MustacheEngineBuilder
+        .newBuilder()
+        .registerHelper("jodaDateTimeFormatter", new JodaDateTimeFormatHelper())
+        .build()
+        .compileMustache("email", IOUtils.toString(in))
+        .render(data);
 
     emailService.sendEmail(user.getEmail(), "Update", html);
 
-    Collections.reverse(news);
-    newsService.pushNews(username, news);
+    newsService.saveAsSeen(username, news);
     return ResponseEntity.ok().build();
+  }
+
+  public static class DataItem {
+    public String bankName;
+    public List<NewsItem> news;
+
+    public DataItem(String bankName, List<NewsItem> news) {
+      this.bankName = bankName;
+      this.news = news;
+    }
+
+    public String getBankName() {
+      return bankName;
+    }
+
+    public List<NewsItem> getNews() {
+      return news;
+    }
   }
 
   @RequestMapping(value = "/{username}", method = RequestMethod.GET, produces = {"application/json"})

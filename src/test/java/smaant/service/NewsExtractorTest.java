@@ -13,16 +13,20 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import smaant.Application;
+import smaant.model.Bank;
 import smaant.model.NewsItem;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 public class NewsExtractorTest {
 
-  private static final String BANK = "bank";
+  private static final Bank BANK = new Bank("bankName", "bankId");
 
   @Inject
   private NewsExtractor newsExtractor;
+
+  @Inject
+  private BankiRuService bankiRuService;
 
   @Test
   public void dayWithOneItemShouldBeExtracted() throws IOException {
@@ -78,8 +82,8 @@ public class NewsExtractorTest {
     return IOUtils.toString(resource);
   }
 
-  private NewsItem createItem(String bankName, String date, String title, int id) {
-    final String url = String.format("/news/lenta/?id=%d", id);
-    return new NewsItem(bankName, DateTime.parse(date, newsExtractor.getDateTimeFormatter()), title, url);
+  private NewsItem createItem(Bank bank, String date, String title, int id) {
+    final String url = bankiRuService.getFullUrl(String.format("/news/lenta/?id=%d", id));
+    return new NewsItem(bank, DateTime.parse(date, newsExtractor.getDateTimeFormatter()), title, url);
   }
 }

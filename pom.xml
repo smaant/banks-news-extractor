@@ -37,6 +37,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.trimou</groupId>
+            <artifactId>trimou-core</artifactId>
+            <version>1.7.1.Final</version>
+        </dependency>
+
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
             <version>1</version>
@@ -81,6 +87,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.fakemongo</groupId>
+            <artifactId>fongo</artifactId>
+            <version>1.5.8</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -2,27 +2,53 @@ package smaant.model;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.joda.time.DateTime;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+@Document(collection = "news")
 public class NewsItem {
 
-  private int hash;
-  private String bank;
+  @Id
+  private String id;
+
+  @Indexed
+  private String hash;
+
+  @Indexed
+  @Field("seen_by")
+  private List<String> seenBy;
+
+  private Bank bank;
   private DateTime date;
   private String title;
   private String url;
 
-  public NewsItem() { }
+  public NewsItem() {
+    seenBy = Collections.emptyList();
+  }
 
-  public NewsItem(String bank, DateTime date, String title, String url) {
+  public NewsItem(Bank bank, DateTime date, String title, String url) {
+    this();
     this.bank = bank;
     this.date = date;
     this.title = title;
     this.url = url;
-    this.hash = Objects.hashCode(bank, date, title, url);
+    this.hash = DigestUtils.md5Hex(bank.getId() + date.toString() + title + url);
   }
 
-  public String getBank() {
+  public NewsItem(NewsItem src, List<String> seenBy) {
+    this(src.getBank(), src.getDate(), src.getTitle(), src.getUrl());
+    this.id = src.id;
+    this.seenBy = seenBy;
+  }
+
+  public Bank getBank() {
     return bank;
   }
 
@@ -38,8 +64,12 @@ public class NewsItem {
     return url;
   }
 
-  public int getHash() {
+  public String getHash() {
     return hash;
+  }
+
+  public List<String> getSeenBy() {
+    return seenBy;
   }
 
   @Override
@@ -49,6 +79,8 @@ public class NewsItem {
         .add("date", date)
         .add("title", title)
         .add("url", url)
+        .add("hash", hash)
+        .add("seen_by", seenBy)
         .omitNullValues()
         .toString();
   }

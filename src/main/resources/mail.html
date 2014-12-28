@@ -56,6 +56,11 @@
             background-color: #d9d9d7;
         }
 
+        .date {
+            color: #999999;
+            font-size: 70%;
+        }
+
         .yshortcuts a {
             border-bottom: none !important;
         }
@@ -105,13 +110,15 @@
 
                         <div class="body-text" style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;text-align:left;color:#333333">
                             {{#banks}}
-                                <h3>{{bankName}}</h3>
-                                    <ul>
-                                        {{#news}}
-                                            <li>{{jodaDateTimeFormatter date pattern="dd-MM-yyyy HH:mm"}} -
-                                                <a href="{{url}}">{{title}}</a></li>
-                                        {{/news}}
-                                    </ul>
+                            <h3>{{bankName}}</h3>
+                            <ul>
+                                {{#news}}
+                                <li>
+                                    <a href="{{url}}">{{title}}</a>
+                                    <span class="date">{{jodaDateTimeFormatter date pattern="dd-MM-yyyy&nbsp;HH:mm"}}</span>
+                                </li>
+                                {{/news}}
+                            </ul>
                             {{/banks}}
 
                         </div>

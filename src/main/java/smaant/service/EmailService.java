@@ -41,6 +41,7 @@ public class EmailService {
     try {
       email.addTo(to);
       email.setSubject(subject);
+      email.setCharset("UTF-8");
       email.setHtmlMsg(body);
       email.send();
     } catch (EmailException e) {

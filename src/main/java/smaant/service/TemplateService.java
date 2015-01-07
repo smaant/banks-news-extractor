@@ -30,7 +30,7 @@ public class TemplateService {
         throw new RuntimeException(e);
       }
     } else {
-      return this.getClass().getResourceAsStream("mail.html");
+      return this.getClass().getResourceAsStream("/mail.html");
     }
   }
 
@@ -42,7 +42,7 @@ public class TemplateService {
 
     final String template;
     try {
-       template = IOUtils.toString(getTemplateStream());
+       template = IOUtils.toString(getTemplateStream(), "UTF-8");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

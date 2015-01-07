@@ -1,0 +1,8 @@
+---
+app_config_dir: /etc/{{app_name}}
+app_bin_dir: /root/{{app_name}}
+
+email_host:
+email_user:
+email_password:
+email_from:

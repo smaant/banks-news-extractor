@@ -1,0 +1,28 @@
+url.base=https://www.banki.ru
+url.bank=${url.base}/banks/bank/
+url.news_path=/news/
+
+selector.news_date=div.widget__date
+selector.news_group=${selector.news_date}+ul
+selector.news_item=li
+selector.news_time=span.text-list-date
+selector.news_title=a.text-list-link
+selector.news_link=${selector.news_title}
+
+selector.news_article=article.lenta
+selector.article_content=${selector.news_article} > *
+tags_to_remove=div
+
+news_date_time_pattern=dd.MM.yyyy HH:mm
+
+spring.data.mongodb.uri=mongodb://{{mongo_container}}:{{mongo_port}}/bankiru
+
+debug=
+
+email.template.path=
+
+email.host={{email_host}}
+email.ssl_port=465
+email.user={{email_user}}
+email.password={{email_password}}
+email.from={{email_from}}

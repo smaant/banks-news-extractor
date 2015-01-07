@@ -1,0 +1,23 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+    - name: make sources
+      shell: mvn clean package -DfinalName={{app_name}}
+      args:
+        chdir: ../
+
+- hosts: all
+  remote_user: "{{remote_user}}"
+  roles:
+    - common
+
+- hosts: dbs
+  remote_user: "{{remote_user}}"
+  roles:
+    - db
+
+- hosts: apps
+  remote_user: "{{remote_user}}"
+  roles:
+    - app

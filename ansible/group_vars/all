@@ -1,0 +1,6 @@
+---
+mongo_container: mongo
+dbdata_container: dbdata
+app_container: app
+
+app_name: news-grabber

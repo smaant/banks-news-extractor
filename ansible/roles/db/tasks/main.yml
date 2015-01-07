@@ -1,0 +1,30 @@
+---
+- name: create dbdata container
+  sudo: yes
+  docker: image=ubuntu:14.04 name={{dbdata_container}} volumes=/dbdata
+
+- name: copy dockerfile
+  sudo: yes
+  copy: src=Dockerfile dest=~/dockerfiles/mongo/
+
+- name: create mongodb docker image
+  sudo: yes
+  shell: docker build --rm -t "smaant/mongodb" ~/dockerfiles/mongo
+
+- name: start mongodb container
+  sudo: yes
+  docker: >
+    image=smaant/mongodb
+    name={{mongo_container}}
+    volumes_from={{dbdata_container}}
+    expose={{mongo_port}}
+    command="mongod --dbpath=/dbdata"
+
+- name: update /etc/hosts
+  sudo: yes
+  lineinfile: >
+    dest=/etc/hosts
+    backup=yes
+    regexp="\d+\.\d+\.\d+\.\d+\s+{{mongo_container}}"
+    line="{{item['NetworkSettings']['IPAddress']}}\t{{mongo_container}}"
+  with_items: docker_containers

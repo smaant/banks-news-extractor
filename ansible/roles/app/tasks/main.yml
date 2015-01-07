@@ -1,0 +1,39 @@
+---
+- name: copy dockerfile
+  sudo: yes
+  copy: src=Dockerfile dest=~/dockerfiles/java/
+
+- name: create java8 docker image
+  sudo: yes
+  shell: docker build --rm -t "smaant/java8" ~/dockerfiles/java
+
+- name: copy application jar
+  sudo: yes
+  copy: src=../target/{{app_name}}.jar dest={{app_bin_dir}}/
+
+- name: create folder for application's config
+  sudo: yes
+  file: path={{app_config_dir}} state=directory
+
+- name: copy application properties
+  sudo: yes
+  template: src=application.properties.j2 dest={{app_config_dir}}/application.properties
+
+- name: start application container
+  sudo: yes
+  docker: >
+    image=smaant/java8
+    name={{app_container}}
+    links={{mongo_container}}:{{mongo_container}}
+    volumes={{app_bin_dir}}:{{app_bin_dir}},{{app_config_dir}}:{{app_config_dir}}
+    expose=8080
+    command="java -jar {{app_bin_dir}}/{{app_name}}.jar --spring.config.location={{app_config_dir}}/application.properties"
+
+- name: update /etc/hosts
+  sudo: yes
+  lineinfile: >
+    dest=/etc/hosts
+    backup=yes
+    regexp="\d+\.\d+\.\d+\.\d+\s+{{app_container}}"
+    line="{{item['NetworkSettings']['IPAddress']}}\t{{app_container}}"
+  with_items: docker_containers
